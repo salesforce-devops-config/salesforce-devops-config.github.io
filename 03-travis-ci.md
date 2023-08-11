@@ -71,9 +71,15 @@ First let's start with a very simple pipeline that hast an implementation enviro
 
 ![Simple Pipeline](assets/images/env-strategy-simple-pipeline.svg)
 
-**[Learn How >>](travis-ci/simple-pipeline.html)**
+**[Learn More >>](travis-ci/simple-pipeline.html)**
 
 ### Simple Project
+With small changes to the base Travis-CI configuration we can set up a slightly more complex configuration suited for small projects or in-house business as usual operations, like this one:
+
+![Simple Project Pipeline](assets/images/env-strategy-simple-project.svg)
+
+**[Learn More >>](travis-ci/simple-project.html)**
+
 ### Complex Pipeline
 
 ## Pipeline Configuration Points
