@@ -81,6 +81,10 @@ With small changes to the base Travis-CI configuration we can set up a slightly 
 **[Learn More >>](travis-ci/simple-project.html)**
 
 ### Complex Pipeline
+Combining the simple project configuration with a bit of extra git repository setup and a few more environment variables, we can create a much more complex pipeline, like the following one:
+![Complex Pipeline](assets/images/env-strategy-complex-pipeline.svg)
+
+**[Learn More >>](travis-ci/complex-project.html)**
 
 ## Pipeline Configuration Points
 ... Coming Soon ...

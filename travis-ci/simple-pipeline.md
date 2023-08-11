@@ -12,7 +12,7 @@ With the base configuration we can already start using a simple pipeline like th
 In this pipeline we'll implement our changes in the **Implementation** org, maybe more than one developer or admin will work on the same org. Then Will use git and Travis-CI to move the changes to Testing (which will act as a merge and testing environment for us), and once we've tested the changes, we'll promote the changes to production.
 
 This is how we can start using this simple pipeline:
-1. When we have finished a user story we will create a `feature` branch from `relese` branch.
+1. When we have finished a user story we will create a `feature` branch from `release` branch.
 2. We will retrieve the changes we've made to that `feature` branch and push the changes.
 3. We will create a pull request from the `feature` branch to `release`, this will trigger Travis-CI to:
    - **Validate** the changes against the org we've configured in MERGE_AUTH_URL environment variable in Travis-CI Settings.

@@ -8,7 +8,7 @@ show_tile: false
 ---
 In this pipeline we have 3 sandbox in which our team is going to be implementing changes: CONFIG CHANGES, DEV 1 AND DEV 2, and the pipeline will bundle them together in an environment that will be used for merging and DR (dry run) tests. And from there it will move the changes to a testing environment for QA and UAT and after that, it will promote the changes to production.
 
-With the base configuration we are almost totaly set up to be able to work with a simple project or business as usual pipeline like this:
+With the [base configuration](../03-travis-ci.html#preparing-your-repository-with-this-travis-ci-configuration) we are almost totaly set up to be able to work with a simple project or business as usual pipeline like this:
 ![Simple Project](../assets/images/env-strategy-simple-project.svg)
 
 We just need to add an auth url environment variable per each of our implementation environments and another one for the QA / UAT environments in Travis-CI settings, in our example we'll the following 4:
@@ -18,7 +18,7 @@ We just need to add an auth url environment variable per each of our implementat
 - **UAT_AUTH_URL** with the `SFDX Auth URL` for QA / UAT testing environment.
 
 This is how we can start using this simple project pipeline, very similar to the simple pipeline scenario:
-1. When we have finished a user story we will create a `feature` branch from `relese` branch.
+1. When we have finished a user story we will create a `feature` branch from `release` branch.
 2. We will retrieve the changes we've made in any of the implementation environments to that `feature` branch and push the changes, we can use VS Code Salesforce Extensions for retrieving the metadata, or the salesforce cli, or any other tool.
 3. We will create a pull request from the `feature` branch to `release`, this will trigger Travis-CI to:
    - **Validate** the changes against the org we've configured in MERGE_AUTH_URL environment variable in Travis-CI Settings.
