@@ -86,5 +86,114 @@ Combining the simple project configuration with a bit of extra git repository se
 
 **[Learn More >>](travis-ci/complex-project.html)**
 
-## Pipeline Configuration Points
-... Coming Soon ...
+## More Pipeline Configuration Points
+
+### Allow Pull Requests to `main`
+By default, this Travis configuration will only allow to create Pull Requests to `main` from either `release` or `cs-enhancements`, but we allow other branchs by adding the Travis-CI environment variable **TRAVIS_PULL_REQUEST_BRANCH**.
+
+In **TRAVIS_PULL_REQUEST_BRANCH** we will add a comma separated list of branches that will be allowed to create a pull requests directly to `main`.
+
+### Change the Baseline Tag for a Stream of Work
+By default, this Travis-CI configuration creates the delta packages it validates and promotes using the tag configured the environemnt variable **PROD_VERSION**.
+
+But we can change that, if we **create a baseline variable** for the environment we're validating on or promoting to. A baseline variable for an environment starts with the ID of the environment in Travis-CI config followed by `_BASELINE`.
+
+As an example, when we validate or promote to `P1_AUTH_URL` and we want it to use a previous production version because the project is not ready to back-promote the changes. In this case the ID is `P1` and we can configure that version in `P1_BASELINE` and Travis-CI will use it to build the delta package.
+
+### Increasing Travis-CI Wait for Timeouts
+By default Travis-CI will use 30 minutes before it times out (using this configuration), but we can configure it with an environment variable.
+
+We can set **TRAVIS_WAIT** environment variable with the number of minutes we need travis to wait. This will be applied to all the validations and promotions.
+
+### Use Different Environments to Validate and Promote in a Pull Request
+By default travis will use one of the `_AUTH_URL` variables to validate against or promote to. However there are some scenarios in which we may want to separate the validations and the promotions, and we can do dhat by adding `_AUTH_URL_CI` variables.
+
+We can either choose to have a single CI environment to validate against or a pool of CI environments for each environment configured as `_AUTH_URL` variable.
+
+For example, we have an environment in which we validate and promote when we create a pull request to `p1-release`, it is configured in the environment variable `P1_AUTH_URL`.
+But we have a lot of validations happening from different PRs to `p1-release` that get blocked constantly because there's another validation going on, and we want to have Travis-CI validating in a pool of 4 CI sandboxes.
+
+We will need to create 4 new variables: `P1_AUTH_URL_CI_1`, `P1_AUTH_URL_CI_2`, `P1_AUTH_URL_CI_3` and `P1_AUTH_URL_CI_4` anbd set the SFDX Auth URL of each one of the CI environments in them.
+
+If we want just one CI environment, then we can just create teh environment variable `P1_AUTH_URL_CI` and set the SFDX Auth URL of that environment there.
+
+### Default Test Level When Promoting
+By default Travis will promote using the default test level for the org we are promoting to, that is it won’t run tests on promotion for sandboxes and it will run local tests for production orgs.
+
+We can change it by adding a variable with the stream of work id  or the id of the id of the org Travis will deploy to, post-fixed with `_DEPLOY_DEFAULT_TEST_LEVEL` and give it the value of false. This way Travis will use the same test levels that we configure for the validations in the [next section](#how-to-configure-tests-for-each-feature).
+
+#### Some examples:
+We have a Stream of Work called with ID `P1`, which has a merge org configured with `P1_AUTH_URL` in Travis. If we want to run the same level of tests that we run when we validate against P1_AUTH_URL, we would add a variable called **P1_DEPLOY_DEFAULT_TEST_LEVEL** and give it false as value.
+
+If we have a training org (configured in Travis as `TRAINING_AUTH_URL`) to which we promote changes using a training version tag (i.e. training-v1.2.0) and we want the promotion to run the same test level used to validate, we need to create a variable **TRAINING_DEPLOY_DEFAULT_TEST_LEVEL** with value false.
+
+### Configuring Travis to Run Validations with Specific Test Levels
+The sooner we run tests, the earlier we’ll find issues. We don’t want to promote an already tested version and find out it’s breaking tests.
+
+Our out-of-the-box Travis configuration allow us to decide what test level and what tests to run for each feature by creating a `.json` file in the `tests` directory.
+
+The content of this file is a JSON object with the following fields:
+- **testLevel**: Corresponding to the salesforce test levels we can use with sfdx. Allowed Values:
+  - RunAllTestsInOrg
+  - RunLocalTests
+  - RunSpecifiedTests
+  - NoTestRun
+- **test**: This is only mandatory when we use testLevel `RunSpecifiedTests` and it is a list of tests classes we want to run, in the form of a JSON array of strings.
+
+#### How to Configure Tests for each Feature
+For each feature we want to change change the test level we will create a .json file in `tests` directory with a unique name in the feature branch, i.e. `tests/feature-xxxx.json` for the Feature XXXX.
+
+The name we choose is irrelevant for Travis, but it needs to be a .json file. However it’s beneficial for the team if the name is meaningful, so if possible, use the feature id, that helps identify what feature required what test level.
+
+It is important to keep the .json file name unique, because when the feature branch is merged to the release branch we will avoid merge conflicts.
+
+When we validate or promote from a release branch, with bundled features that included different test levels, Travis will consolidate the test levels like this:
+
+1. If there’s any feature that needs RunAllTestsInOrg, this is the test level used.
+2. If there’s no RunAllTestsInOrg, but there’s at least one RunLocalTests, Travis will use this test level for the bundle.
+3. If there are no RunAllTestsInOrg or RunLocalTests, but there are RunSpecifiedTests, Travis will use this test level, and will run all the tests specified in the json files.
+4. Finally, if there is no test levels, or we only have NoTestRun, Travis will use the default of the org we’re validating or promoting.
+
+#### Running All Tests In Org for a Feature
+If we need to run all tests for a feature, we will create a .json file in `tests` directory with a unique name, for example the feature id, i.e. `tests/feature-0001.json`, specifying the testLevel `RunAllTestsInOrg`.
+
+Example:
+```json
+{
+  "testLevel": "RunAllTestsInOrg"
+}
+```
+
+#### Running Local Test for a Feature
+When we need to run local tests for a feature, we will create a .json file in `tests` directory with a unique name, i.e.: `tests/feature-0002.json`, specifying the testLevel `RunLocalTests`.
+
+Example:
+```json
+{
+  "testLevel": "RunLocalTests"
+}
+```
+
+#### Running Specific Tests for a Feature
+More often we’ll want to specify what tests we want to run for our changes, to do it we will create a .json file in `tests` directory with a unique name, like `tests/feature-0003.json`, specifying the testLevel `RunSpecifiedTests` and adding the list of tests classes we want to run in the `tests` field.
+
+Example:
+```json
+{
+  "testLevel": "RunSpecifiedTests",
+  "tests": [
+    "Test01", "Test02", "Test03",
+    "Test04", "Test05", "Test06"
+  ]
+}
+```
+
+#### No Test Run Validations or Promotions
+In some cases we may not need to run tests for some feature, in that case we’ll create a .json file in `tests` directory with a unique name, i.e. `tests/feature-0004.json` specifying the testLevel `NoTestRun`.
+
+Example:
+```json
+{
+  "testLevel": "NoTestRun"
+}
+ ```
