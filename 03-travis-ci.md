@@ -29,7 +29,8 @@ When the pipeline is implemented, you can go back to your Travis-CI project's se
 ## Implementing Pipelines
 We will implement our pipeline with Travis-CI and [this configuration](https://github.com/salesforce-devops-config/travis-ci){:target="_blank"} accordingly with our needs.
 
-However there are some mandatory configuration points we need no matter what is the shape of the pipeline we will end up implementing:
+### Base Configuration
+However there is some basic configuration points we need no matter what is the shape of the pipeline we will end up implementing:
 + We will need to **tag the baseline** of production in `main` or `master` branch. After we have added this Travis-CI config to our Salesforce repository we will pull the current state of Production to `main`, and then we will create and push a git tag to identify the base that the pipeline will use to calculate the changes. I.e. we can call it `prod-baseline` or `v0.0.0`.
 
 + We will need to **create a `release` branch** in our Salesforce repository. We will use this branch in which we will bundle all the changes that we will promote through the pipeline to Prod.
@@ -44,6 +45,7 @@ However there are some mandatory configuration points we need no matter what is 
 
 Only with this mandatory configuration we already have implemented a simple pipeline in which we can safely move changes from one or more implementation environments to a bundle/testing environment and then to production.
 
+### Other Configuration
 These are the actions we can automate with this travis configuration out-of-the-box just by creating Travis-CI environment variables and git branches:
 + **Validate changes** when we create a pull request to release, project release, environment or main branches:
   + The pipeline by default will validate against the same environment to which it will promote these changes when the PR is merged.
@@ -60,11 +62,19 @@ These are the actions we can automate with this travis configuration out-of-the-
 + **Back-promote changes** by creating backpromote tags (or via pull requests).
 
 ## Pipeline Examples Implementation
+Let's see how we can configure pipelines with different complexity levels.
 
-... Coming Soon ...
+I'm going to assume we already have a github repository with an SFDX project set up as explaind in the [Preparing Your Repository with this Travis-CI Configuration section](#preparing-your-repository-with-this-travis-ci-configuration) and configured as explained in the [Base Configuration section](#base-configuration).
 
 ### Simple Pipeline
+First let's start with a very simple pipeline that hast an implementation environment, a merge/test environment and production, like this one:
+
+![Simple Pipeline](assets/images/env-strategy-simple-pipeline.svg)
+
+**[Learn How >>](travis-ci/simple-pipeline.html)**
+
 ### Simple Project
 ### Complex Pipeline
 
+## Pipeline Configuration Points
 ... Coming Soon ...
